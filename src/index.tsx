@@ -58,8 +58,23 @@ table {
 * {
   box-sizing: border-box;
 }
+body {
+  font-weight: 300;
+  font-family: 'Source Sans Pro', sans-serif;
+  color:${(props) => props.theme.white.darker};
+  line-height: 1.2;
+  background-color: black;
+}
 a {
-  text-decoration-line: none;
+  text-decoration:none;
+  color:inherit;
+}
+::-webkit-scrollbar {
+  display: none;
+}
+.scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 `;
 
