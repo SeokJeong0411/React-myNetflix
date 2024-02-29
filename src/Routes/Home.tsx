@@ -67,11 +67,33 @@ const SliderBox = styled(motion.div)<{ bgImg: string }>`
   }
 `;
 
+const SliderBoxInfo = styled(motion.div)`
+  padding: 10px;
+  background-color: ${(props) => props.theme.black.lighter};
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+
+  h4 {
+    text-align: center;
+    font-size: 18px;
+  }
+`;
+
 /* --- Motion Variants --- */
 const BoxVariants = {
   normal: { scale: 1 },
   hover: {
     scale: 1.3,
+    y: -40,
+    transition: { delay: 0.2, type: "tween" },
+  },
+};
+
+const InfoVariants = {
+  hover: {
+    opacity: 1,
     transition: { delay: 0.2, type: "tween" },
   },
 };
@@ -133,7 +155,11 @@ function Home() {
                       initial="normal"
                       whileHover="hover"
                       transition={{ type: "tween" }}
-                    />
+                    >
+                      <SliderBoxInfo variants={InfoVariants}>
+                        <h4>{movie.title}</h4>
+                      </SliderBoxInfo>
+                    </SliderBox>
                   ))}
               </SliderRow>
             </AnimatePresence>
