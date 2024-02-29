@@ -26,6 +26,7 @@ const Banner = styled.div<{ bgImg: string }>`
   padding: 60px;
   background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.5)), url(${(props) => props.bgImg});
   background-size: cover;
+  background-position: center center;
 `;
 
 const Title = styled.h2`
@@ -51,26 +52,55 @@ const SliderRow = styled(motion.div)`
   top: -100px;
 `;
 
-const SliderBox = styled(motion.div)`
+const SliderBox = styled(motion.div)<{ bgImg: string }>`
   background-color: white;
+  background-image: url(${(prev) => prev.bgImg});
+  background-size: cover;
+  background-position: center center;
   height: 200px;
+
+  &:first-child {
+    transform-origin: center left;
+  }
+  &:last-child {
+    transform-origin: center right;
+  }
 `;
 
 /* --- Motion Variants --- */
-const rowVariants = {
-  hidden: { x: window.innerWidth + 10 },
-  visible: { x: 0 },
-  exit: { x: -window.innerWidth - 10 },
+const BoxVariants = {
+  normal: { scale: 1 },
+  hover: {
+    scale: 1.3,
+    transition: { delay: 0.2, type: "tween" },
+  },
 };
 
+const SLIDER_OFFSET = 6;
+
 function Home() {
+  /* --- Motion Variants --- */
+  const rowVariants = {
+    hidden: { x: window.innerWidth + 10 },
+    visible: { x: 0 },
+    exit: { x: -window.innerWidth - 10 },
+  };
+
   const { data, isLoading } = useQuery<IGetMoviesResult>(["movies", "nowPlaying"], getMoives);
 
   const [index, setIndex] = useState(0);
-
   const increaseIndex = () => {
-    setIndex((prev) => prev + 1);
+    if (data) {
+      if (leaving) return;
+      toggleLeaving();
+      const totalMovies = data.results.length - 1;
+      const maxIndex = Math.ceil(totalMovies / SLIDER_OFFSET) - 1;
+      setIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
+    }
   };
+  const toggleLeaving = () => setLeaving((prev) => !prev);
+
+  const [leaving, setLeaving] = useState(false);
 
   return (
     <Wrapper style={{ height: "200vh" }}>
@@ -83,7 +113,7 @@ function Home() {
             <Overview>{data?.results[0].overview}</Overview>
           </Banner>
           <Slider>
-            <AnimatePresence>
+            <AnimatePresence initial={false} onExitComplete={toggleLeaving}>
               <SliderRow
                 key={index}
                 variants={rowVariants}
@@ -92,12 +122,19 @@ function Home() {
                 exit="exit"
                 transition={{ type: "tween", duration: 4 }}
               >
-                <SliderBox></SliderBox>
-                <SliderBox></SliderBox>
-                <SliderBox></SliderBox>
-                <SliderBox></SliderBox>
-                <SliderBox></SliderBox>
-                <SliderBox></SliderBox>
+                {data?.results
+                  .slice(1)
+                  .slice(SLIDER_OFFSET * index, SLIDER_OFFSET * index + SLIDER_OFFSET)
+                  .map((movie) => (
+                    <SliderBox
+                      key={movie.id}
+                      bgImg={makeImagePath(movie.backdrop_path || "", "w500")}
+                      variants={BoxVariants}
+                      initial="normal"
+                      whileHover="hover"
+                      transition={{ type: "tween" }}
+                    />
+                  ))}
               </SliderRow>
             </AnimatePresence>
           </Slider>
