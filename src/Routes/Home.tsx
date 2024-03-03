@@ -1,5 +1,5 @@
 import { useQuery } from "react-query";
-import { IGetMoviesResult, getMoives } from "../api";
+import { IGetMoviesResult, getMoives, getPopularMovies, getTopRatedMovies, getUpcomingMovies } from "../api";
 import styled from "styled-components";
 import { makeImagePath } from "../utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,9 +10,7 @@ import { useSetRecoilState } from "recoil";
 import { nowPlayingAtom } from "../atoms";
 
 /* --- CSS --- */
-const Wrapper = styled.div`
-  /* background-color: black; */
-`;
+const Wrapper = styled.div``;
 
 const Loader = styled.div`
   height: 20vh;
@@ -94,14 +92,27 @@ function Home() {
 
   const bigMovieMatch = useMatch("/movies/:movieId");
   const { data, isLoading } = useQuery<IGetMoviesResult>(["movies", "nowPlaying"], getMoives);
-  const setNowPlayingAtom = useSetRecoilState(nowPlayingAtom);
+  const { data: popularMovies, isLoading: isPopularMoviesLoading } = useQuery<IGetMoviesResult>(
+    ["movies", "popularMovies"],
+    getPopularMovies
+  );
+  const { data: topRatedMovies, isLoading: isTopRatedMoviesLoading } = useQuery<IGetMoviesResult>(
+    ["movies", "topRatedMovies"],
+    getTopRatedMovies
+  );
+  const { data: upcomingMovies, isLoading: isUpcomingMoviesLoading } = useQuery<IGetMoviesResult>(
+    ["movies", "upcomingMovies"],
+    getUpcomingMovies
+  );
 
-  useEffect(() => {
-    if (data) {
-      console.log("reload");
-      setNowPlayingAtom(data?.results);
-    }
-  }, [isLoading]);
+  // const setNowPlayingAtom = useSetRecoilState(nowPlayingAtom);
+  //
+  // useEffect(() => {
+  //   if (data) {
+  //     console.log("reload");
+  //     setNowPlayingAtom(data?.results);
+  //   }
+  // }, [isLoading]);
 
   const navigate = useNavigate();
 
@@ -122,7 +133,20 @@ function Home() {
             <Title>{data?.results[0].title}</Title>
             <Overview>{data?.results[0].overview}</Overview>
           </Banner>
-          <Slider />
+
+          {/* 슬라이더 */}
+          <Slider title="Now Playing Movies" data={data ? data?.results : []} />
+          {isPopularMoviesLoading ? null : (
+            <Slider title="Popular Movies" data={popularMovies ? popularMovies?.results : []} />
+          )}
+          {isTopRatedMoviesLoading ? null : (
+            <Slider title="Top Rated Movies" data={topRatedMovies ? topRatedMovies?.results : []} />
+          )}
+          {isUpcomingMoviesLoading ? null : (
+            <Slider title="Upcoming Movies" data={upcomingMovies ? upcomingMovies?.results : []} />
+          )}
+
+          {/* 상세팝업 */}
           <AnimatePresence>
             {bigMovieMatch ? (
               <>
