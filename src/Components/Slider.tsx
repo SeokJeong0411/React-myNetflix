@@ -163,7 +163,7 @@ function Slider({ title, data }: { title: string; data: IResults[] }) {
   };
   // 박스 클릭 시 큰 화면
   const onBoxClicked = (movieId: number) => {
-    navigate(`/movies/${movieId}`);
+    navigate(`/movies/${title}/${movieId}`);
   };
 
   return (
@@ -206,7 +206,7 @@ function Slider({ title, data }: { title: string; data: IResults[] }) {
                   >
                     <SliderBoxImg
                       key={movie.id}
-                      layoutId={movie.id + ""}
+                      layoutId={movie.title + movie.id}
                       bgImg={makeImagePath(movie.backdrop_path || "", "w500")}
                       onClick={() => onBoxClicked(movie.id)}
                     />

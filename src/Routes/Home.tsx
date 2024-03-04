@@ -90,7 +90,7 @@ const BigOverview = styled.p`
 function Home() {
   /* --- Motion Variants --- */
 
-  const bigMovieMatch = useMatch("/movies/:movieId");
+  const bigMovieMatch = useMatch("/movies/:movieType/:movieId");
   const { data, isLoading } = useQuery<IGetMoviesResult>(["movies", "nowPlaying"], getMoives);
   const { data: popularMovies, isLoading: isPopularMoviesLoading } = useQuery<IGetMoviesResult>(
     ["movies", "popularMovies"],
@@ -104,6 +104,13 @@ function Home() {
     ["movies", "upcomingMovies"],
     getUpcomingMovies
   );
+
+  const movieInfo: { [index: string]: IGetMoviesResult | undefined } = {
+    "Now Playing Movies": data,
+    "Popular Movies": popularMovies,
+    "Top Rated Movies": topRatedMovies,
+    "Upcoming Movies": upcomingMovies,
+  };
 
   // const setNowPlayingAtom = useSetRecoilState(nowPlayingAtom);
   //
@@ -121,7 +128,13 @@ function Home() {
   };
 
   const clickedMovie =
-    bigMovieMatch?.params.movieId && data?.results.find((movie) => movie.id + "" === bigMovieMatch.params.movieId);
+    bigMovieMatch?.params.movieId &&
+    bigMovieMatch?.params.movieType &&
+    movieInfo[bigMovieMatch?.params.movieType.replaceAll("%20", " ")]?.results.find(
+      (movie) => movie.id + "" === bigMovieMatch.params.movieId
+    );
+  console.log(bigMovieMatch?.params.movieType);
+  console.log(bigMovieMatch);
 
   return (
     <Wrapper style={{ height: "200vh" }}>
@@ -151,7 +164,7 @@ function Home() {
             {bigMovieMatch ? (
               <>
                 <Overlay onClick={onOverlayClicked} animate={{ opacity: 1 }} exit={{ opacity: 0 }}></Overlay>
-                <BigMovie layoutId={bigMovieMatch.params.movieId}>
+                <BigMovie layoutId={bigMovieMatch.params.movieType || "" + bigMovieMatch.params.movieId || ""}>
                   {clickedMovie && (
                     <>
                       <BigMovieImg
